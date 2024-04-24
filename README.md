@@ -35,3 +35,5 @@ it was more time spent troubleshooting than working on the project. So I decided
 starting from scratch and while there was frustration at times I found the experience to be educational. I know others will go through the same experience and I hope that my project serves as encouragement
 to not give up and continue. My biggest challenge was translating my thoughts into the R code I used the systematic approach and found it simpler to work with one table at a time and at the end
 consolidate the results in a notebook.
+
+[Bellabeat Case Study Presentation.pdf](https://github.com/taldrete/taldrete/files/15100495/Bellabeat.Case.Study.Presentation.pdf)
