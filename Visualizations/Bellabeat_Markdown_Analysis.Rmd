@@ -1,0 +1,1280 @@
+---
+title: "Bellabeat Pre presentation"
+author: "tony"
+date: "2024-04-01"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)E)
+```
+
+## Bellabeat Case Study
+
+BellaBeat is a high-tech company dedicated to empowering women around
+the world with knowledge about their health and habits. Founded in 2013
+by Urška Sršen and Sando Mur, our mission is to design innovative
+technology that informs and inspires women on their unique wellness
+journeys.
+
+At BellaBeat, we believe that knowledge is power, and by providing women
+with data-driven insights into their daily activities, sleep patterns,
+and overall health metrics, we can help them make more informed
+decisions to lead happier, healthier lives. Our cutting-edge smart
+products seamlessly blend advanced sensors with user-friendly
+interfaces, putting valuable health information right at your
+fingertips.
+
+## Product Line
+
+-   **BellaBeat App** *(provides users with health data related to their
+    activity, sleep, stress, menstrual cycle and mindfulness habits)*
+-   **Leaf** *(Can be used as bracelet, necklace or clip that tracks
+    activity, sleep and stress)*
+-   **Time** *(A smartwatch that tracks activity, sleep and stress.
+    Works with the BellaBeat App)*
+-   **Spring** *(A smart bottle that tracks liquid intake and hydration
+    levels)*
+-   **BellaBeat membership** *(Provides 24/7 professional and
+    personalized health guidence)*
+
+## Business Task
+
+Analyze the data produced from consumer usage of a non-Bellabeat smart
+device and apply the results to the comparable BellaBeat product
+offering
+
+Questions to answer
+
+What are the trends in smart device usage? How could these trends apply
+to Bellabeat customers? How could these trends help influence Bellabeat
+marketing strategy?
+
+Data Sources
+
+**FitBit Fitness Tracker Data** *(CC0: Public Domain, dataset made
+available through Mobius): This Kaggle data set contains personal
+fitness tracker from thirty fitbit users. Thirty eligible Fitbit users
+consented to the submission of personal tracker data, including
+minute-level output for physical activity, heart rate, and sleep
+monitoring. It includes information about daily activity, steps, and
+heart rate that can be used to explore users’ habits.)*
+
+##Installing and loading packages
+
+```{r}
+
+#Installing packages to use
+
+#install.packages("tidyverse")
+#install.packages("lubridate")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("tidyr")
+#install.packages("skimr")
+
+
+#Loading libraries
+
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(skimr)
+
+
+```
+
+##Data Sets to use
+
+**The results of this analysis using the fitbit data will be used and
+applied to the BellaBeat Time as it is the flagship product and the more
+comparable to fitbit**
+
+#After installing and loading the required packages and libraries we
+move to uploading the dataset. The dataset contains many large csv files
+and not all of them have data that fits our scenario. For this case
+study I am using the following
+
+I have selected the following Data frames to explore
+
+*Activity* *Calories* *Heartrate* *Intensities* *Steps* *Weight*
+
+**After loading the sets we need to make sure that the data is clean and
+in a proper format prior to our analysis**
+
+##Cleaning the Sets
+
+**Activity Set**
+
+```{r}
+#lOAD AND eXPLORE dATASeT
+
+load("Activity.RData")
+
+
+View(Activity)
+head(Activity)
+tail(Activity)
+colnames(Activity)
+str(Activity)
+names(Activity)
+length(Activity)
+class(Activity)
+unique(Activity)
+dim(Activity)
+
+#Id and ActivityDate values are inconsequential for the purpose of our task
+#CLEAN "TotalSteps"
+
+#1.- Looking for missing values
+sum(is.na(Activity$TotalSteps))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$TotalSteps)
+stats <- boxplot.stats(Activity$TotalSteps)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS (created a new column called Clean_Total_Steps and  a ne df Activity_without_outliers)
+
+Clean_TotalSteps <- Activity$TotalSteps[Activity$TotalSteps %in% stats$out]
+Activity$TotalSteps[Activity$TotalSteps %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$TotalSteps %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN TOTALDISTANCE
+
+#1.- Looking for missing values
+sum(is.na(Activity$TotalDistance))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$TotalDistance)
+stats <- boxplot.stats(Activity$TotalDistance)
+Clean_TotalSteps <- Activity$TotalDistance[Activity$TotalDistance %in% stats$out]
+Activity$TotalDistance[Activity$TotalDistance %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$TotalDistance %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+
+#CLEAN TRACKER DISTANCE
+#1.- Looking for missing values
+sum(is.na(Activity_without_outliers$TrackerDistance))
+colSums(is.na(Activity_without_outliers))
+
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$TrackerDistance)
+stats <- boxplot.stats(Activity$TrackerDistance)
+Clean_TotalSteps <- Activity$TrackerDistance[Activity$TrackerDistance %in% stats$out]
+Activity$TrackerDistance[Activity$TrackerDistance %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$TrackerDistance %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN VERYACTIVEDISTANCE
+#1.- Looking for missing values
+sum(is.na(Activity$VeryActiveDistance))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$VeryActiveDistance)
+stats <- boxplot.stats(Activity$VeryActiveDistance)
+Clean_TotalSteps <- Activity$VeryActiveDistance[Activity$VeryActiveDistance %in% stats$out]
+Activity$VeryActiveDistance[Activity$VeryActiveDistance %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$VeryActiveDistance %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN MODERATELYACTIVEDISTANCE
+#1.- Looking for missing values
+sum(is.na(Activity$ModeratelyActiveDistance))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$ModeratelyActiveDistance)
+stats <- boxplot.stats(Activity$ModeratelyActiveDistance)
+Clean_TotalSteps <- Activity$ModeratelyActiveDistance[Activity$ModeratelyActiveDistance %in% stats$out]
+Activity$ModeratelyActiveDistance[Activity$ModeratelyActiveDistance %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$ModeratelyActiveDistance %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN LIGHTACTIVEDISTANCE
+#1.- Looking for missing values
+sum(is.na(Activity$LightActiveDistance))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$LightActiveDistance)
+stats <- boxplot.stats(Activity$LightActiveDistance)
+Clean_TotalSteps <- Activity$LightActiveDistance[Activity$LightActiveDistance %in% stats$out]
+Activity$LightActiveDistance[Activity$LightActiveDistance %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$LightActiveDistance %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN VERYACTIVEMINUTES
+#1.- Looking for missing values
+sum(is.na(Activity$VeryActiveMinutes))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$VeryActiveMinutes)
+stats <- boxplot.stats(Activity$VeryActiveMinutes)
+Clean_TotalSteps <- Activity$VeryActiveMinutes[Activity$VeryActiveMinutes %in% stats$out]
+Activity$VeryActiveMinutes[Activity$VeryActiveMinutes %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$VeryActiveMinutes %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN FAIRLYACTIVEMINUTES
+#1.- Looking for missing values
+sum(is.na(Activity$FairlyActiveMinutes))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$FairlyActiveMinutes)
+stats <- boxplot.stats(Activity$FairlyActiveMinutes)
+Clean_TotalSteps <- Activity$FairlyActiveMinutes[Activity$FairlyActiveMinutes %in% stats$out]
+Activity$FairlyActiveMinutes[Activity$FairlyActiveMinutes %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$FairlyActiveMinutes %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN LIGHTLYACTIVEMINUTES
+#1.- Looking for missing values
+sum(is.na(Activity$LightlyActiveMinutes))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$LightlyActiveMinutes)
+stats <- boxplot.stats(Activity$LightlyActiveMinutes)
+Clean_TotalSteps <- Activity$LightlyActiveMinutes[Activity$LightlyActiveMinutes %in% stats$out]
+Activity$LightlyActiveMinutes[Activity$LightlyActiveMinutes %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$LightlyActiveMinutes %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN SEDENTARYMINUTES
+
+#1.- Looking for missing values
+sum(is.na(Activity$SedentaryMinutes))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$SedentaryMinutes)
+stats <- boxplot.stats(Activity$SedentaryMinutes)
+Clean_TotalSteps <- Activity$SedentaryMinutes[Activity$SedentaryMinutes %in% stats$out]
+Activity$SedentaryMinutes[Activity$SedentaryMinutes %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$SedentaryMinutes %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+#CLEAN CALORIES
+
+#1.- Looking for missing values
+sum(is.na(Activity$Calories))
+colSums(is.na(Activity))
+
+#2.- Clean Column Names
+janitor::clean_names(Activity)
+
+#3.- Convert Data Types
+str(Activity)
+glimpse(Activity)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity)
+unique((Activity))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Activity$Calories)
+stats <- boxplot.stats(Activity$Calories)
+Clean_TotalSteps <- Activity$Calories[Activity$Calories %in% stats$out]
+Activity$Calories[Activity$Calories %in% Clean_TotalSteps] <- NA
+Activity_without_outliers <- Activity[!Activity$Calories %in% Clean_TotalSteps, ]
+View(Activity_without_outliers)
+#save(Activity_without_outliers, file = "Activity_without_outliers.RData")
+
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Activity_without_outliers)
+
+#3.- Convert Data Types
+str(Activity_without_outliers)
+glimpse(Activity_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Activity_without_outliers)
+unique((Activity_without_outliers))
+View(Activity_without_outliers)
+dim(Activity_without_outliers)
+
+Clean_Activity <- Activity_without_outliers %>% drop_na()
+View(Clean_Activity)
+str(Clean_Activity)
+dim(Clean_Activity)
+
+save(Clean_Activity, file = "Clean_Activity.RData")
+
+```
+
+**Calories Set**
+
+```{r}
+#Load and Explore Dataset
+
+
+load("Calories.RData")
+View(Calories)
+head(Calories)
+tail(Calories)
+colnames(Calories)
+str(Calories)
+names(Calories)
+length(Calories)
+class(Calories)
+unique(Calories)
+dim(Calories)
+
+#Looking for missing Values
+#1.- Looking for missing values
+sum(is.na(Calories$Calories))
+colSums(is.na(Calories))
+
+#2.- Clean Column Names
+janitor::clean_names(Calories)
+
+#3.- Convert Data Types
+str(Calories)
+glimpse(Calories)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Calories)
+unique((Calories))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Calories$Calories)
+stats <- boxplot.stats(Calories$Calories)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Calories$Calories[Calories$Calories %in% stats$out]
+Calories$Calories[Calories$Calories %in% outliers] <- NA
+Calories_without_outliers <- Calories[!Calories$Calories %in% outliers, ]
+View(Calories_without_outliers)
+#save(Calories_without_outliers, file = "Calories_without_outliers.RData")
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Calories_without_outliers)
+
+#3.- Convert Data Types
+str(Calories_without_outliers)
+glimpse(Calories_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Calories_without_outliers)
+unique((Calories_without_outliers))
+View(Calories_without_outliers)
+dim(Calories_without_outliers)
+
+Clean_Calories <- Calories_without_outliers %>% drop_na()
+View(Clean_Calories)
+str(Clean_Calories)
+dim(Clean_Calories)
+
+#save(Clean_Calories, file = "Clean_Calories.RData")
+```
+
+**Heartrate Set**
+
+```{R}
+#lOAD AND eXPLORE dATASeT
+load("Heartrate.RData")
+
+View(Heartrate)
+head(Heartrate)
+tail(Heartrate)
+colnames(Heartrate)
+
+#Renaming "Value" for "BPM"
+#library(dplyr)
+Heartrate <- Heartrate %>% rename(BPM = Value)
+
+str(Heartrate)
+names(Heartrate)
+length(Heartrate)
+class(Heartrate)
+unique(Heartrate)
+dim(Heartrate)
+
+
+#CLEAN "BPM"
+
+#1.- Looking for missing values
+sum(is.na(Heartrate$BPM))
+colSums(is.na(Heartrate))
+
+#2.- Clean Column Names
+janitor::clean_names(Heartrate)
+
+#3.- Convert Data Types
+str(Heartrate)
+glimpse(Heartrate)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Heartrate)
+unique((Heartrate))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Heartrate$BPM)
+stats <- boxplot.stats(Heartrate$BPM)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Heartrate$BPM[Heartrate$BPM %in% stats$out]
+Heartrate$BPM[Heartrate$BPM %in% outliers] <- NA
+Heartrate_without_outliers <- Heartrate[!Heartrate$BPM %in% outliers, ]
+View(Heartrate_without_outliers)
+#save(Heartrate_without_outliers, file = "Heartrate_without_outliers.RData")
+
+
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Heartrate_without_outliers)
+
+#3.- Convert Data Types
+str(Heartrate_without_outliers)
+glimpse(Heartrate_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Heartrate_without_outliers)
+unique((Heartrate_without_outliers))
+View(Heartrate_without_outliers)
+dim(Heartrate_without_outliers)
+
+Clean_Heartrate <- Heartrate_without_outliers %>% drop_na()
+View(Clean_Heartrate)
+str(Clean_Heartrate)
+dim(Clean_Heartrate)
+
+save(Clean_Heartrate, file = "Clean_Heartrate.RData")
+```
+
+**Intensities Set**
+
+```{R}
+
+#lOAD AND eXPLORE dATASeT
+load("Intensities.RData")
+
+View(Intensities)
+head(Intensities)
+tail(Intensities)
+colnames(Intensities)
+str(Intensities)
+names(Intensities)
+length(Intensities)
+class(Intensities)
+unique(Intensities)
+dim(Intensities)
+
+
+#CLEAN "SedentaryMinutes"
+
+#1.- Looking for missing values
+sum(is.na(Intensities$SedentaryMinutes))
+colSums(is.na(Intensities))
+
+#2.- Clean Column Names
+janitor::clean_names(Intensities)
+
+#3.- Convert Data Types
+str(Intensities)
+glimpse(Intensities)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Intensities)
+unique((Intensities))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Intensities$SedentaryMinutes)
+stats <- boxplot.stats(Intensities$SedentaryMinutes)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Intensities$SedentaryMinutes[Intensities$SedentaryMinutes %in% stats$out]
+Intensities$SedentaryMinutes[Intensities$SedentaryMinutes %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$SedentaryMinutes %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+
+#Clean "LightlyActiveMinutes"
+#1.- Looking for missing values
+sum(is.na(Intensities$LightlyActiveMinutes))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$LightlyActiveMinutes)
+stats <- boxplot.stats(Intensities$LightlyActiveMinutes)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$LightlyActiveMinutes[Intensities$LightlyActiveMinutes %in% stats$out]
+Intensities$LightlyActiveMinutes[Intensities$LightlyActiveMinutes %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$LightlyActiveMinutes %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+#Clean "LightlyActiveMinutes"
+#1.- Looking for missing values
+sum(is.na(Intensities$LightlyActiveMinutes))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$LightlyActiveMinutes)
+stats <- boxplot.stats(Intensities$LightlyActiveMinutes)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$LightlyActiveMinutes[Intensities$LightlyActiveMinutes %in% stats$out]
+Intensities$LightlyActiveMinutes[Intensities$LightlyActiveMinutes %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$LightlyActiveMinutes %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+#Clean "FairlyActiveMinutes"
+#1.- Looking for missing values
+sum(is.na(Intensities$FairlyActiveMinutes))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$FairlyActiveMinutes)
+stats <- boxplot.stats(Intensities$FairlyActiveMinutes)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$FairlyActiveMinutes[Intensities$FairlyActiveMinutes %in% stats$out]
+Intensities$FairlyActiveMinutes[Intensities$FairlyActiveMinutes %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$FairlyActiveMinutes %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+
+#Clean "VeryActiveMinutes"
+#1.- Looking for missing values
+sum(is.na(Intensities$VeryActiveMinutes))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$VeryActiveMinutes)
+stats <- boxplot.stats(Intensities$VeryActiveMinutes)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$VeryActiveMinutes[Intensities$VeryActiveMinutes %in% stats$out]
+Intensities$VeryActiveMinutes[Intensities$VeryActiveMinutes %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$VeryActiveMinutes %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+
+#Clean "LightActiveDistance"
+#1.- Looking for missing values
+sum(is.na(Intensities$LightActiveDistance))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$LightActiveDistance)
+stats <- boxplot.stats(Intensities$LightActiveDistance)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$LightActiveDistance[Intensities$LightActiveDistance %in% stats$out]
+Intensities$LightActiveDistance[Intensities$LightActiveDistance %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$LightActiveDistance %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+#Clean "ModeratelyActiveDistance"
+#1.- Looking for missing values
+sum(is.na(Intensities$ModeratelyActiveDistance))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$ModeratelyActiveDistance)
+stats <- boxplot.stats(Intensities$ModeratelyActiveDistance)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$ModeratelyActiveDistance[Intensities$ModeratelyActiveDistance %in% stats$out]
+Intensities$ModeratelyActiveDistance[Intensities$ModeratelyActiveDistance %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$ModeratelyActiveDistance %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+
+#Clean "VeryActiveDistance"
+#1.- Looking for missing values
+sum(is.na(Intensities$VeryActiveDistance))
+colSums(is.na(Intensities))
+
+#Handle Outliers
+boxplot.stats(Intensities$VeryActiveDistance)
+stats <- boxplot.stats(Intensities$VeryActiveDistance)
+
+#REMOVE OUTLIERS OBSERVATIONS FROM DF
+
+outliers <- Intensities$VeryActiveDistance[Intensities$VeryActiveDistance %in% stats$out]
+Intensities$VeryActiveDistance[Intensities$VeryActiveDistance %in% outliers] <- NA
+Intensities_without_outliers <- Intensities[!Intensities$VeryActiveDistance %in% outliers, ]
+View(Intensities_without_outliers)
+#save(Intensities_without_outliers, file = "Intensities_without_outliers.RData")
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Intensities_without_outliers)
+
+#3.- Convert Data Types
+str(Intensities_without_outliers)
+glimpse(Intensities_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Intensities_without_outliers)
+unique((Intensities_without_outliers))
+View(Intensities_without_outliers)
+dim(Intensities_without_outliers)
+
+Clean_Intensities <- Intensities_without_outliers %>% drop_na()
+View(Clean_Intensities)
+str(Clean_Intensities)
+dim(Clean_Intensities)
+
+save(Clean_Intensities, file = "Clean_Intensities.RData")
+```
+
+**Steps Set**
+
+```{R}
+#lOAD AND eXPLORE dATASeT
+
+load("Steps.RData")
+
+View(Steps)
+head(Steps)
+tail(Steps)
+colnames(Steps)
+
+#Renaming "StepTotal" for "TotalSteps"
+#library(dplyr)
+Steps <- Steps %>% rename(TotalSteps = StepTotal)
+
+str(Steps)
+names(Steps)
+length(Steps)
+class(Steps)
+unique(Steps)
+dim(Steps)
+
+
+#CLEAN "TotalSteps"
+
+#1.- Looking for missing values
+sum(is.na(Steps$TotalSteps))
+colSums(is.na(Steps))
+
+#2.- Clean Column Names
+janitor::clean_names(Steps)
+
+#3.- Convert Data Types
+str(Steps)
+glimpse(Steps)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Steps)
+unique((Steps))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Steps$TotalSteps)
+stats <- boxplot.stats(Steps$TotalSteps)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Steps$TotalSteps[Steps$TotalSteps %in% stats$out]
+Steps$TotalSteps[Steps$TotalSteps %in% outliers] <- NA
+Steps_without_outliers <- Steps[!Steps$TotalSteps %in% outliers, ]
+View(Steps_without_outliers)
+#save(Steps_without_outliers, file = "Steps_without_outliers.RData")
+
+
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Steps_without_outliers)
+
+#3.- Convert Data Types
+str(Steps_without_outliers)
+glimpse(Steps_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Steps_without_outliers)
+unique((Steps_without_outliers))
+View(Steps_without_outliers)
+dim(Steps_without_outliers)
+
+Clean_Steps <- Steps_without_outliers %>% drop_na()
+View(Clean_Steps)
+str(Clean_Steps)
+dim(Clean_Steps)
+
+save(Clean_Steps, file = "Clean_Steps.RData")
+
+```
+
+**Weight Set**
+
+```{R}
+#Load and explore dataset
+
+load("Weight.Rdata")
+
+
+dim(Weight)
+View(Weight)
+names(Weight)
+colnames(Weight)
+str(Weight)
+length(Weight)
+class(Weight)
+unique(Weight)
+head(Weight)
+tail(Weight)
+
+
+#CLEAN "WeightKg"
+
+#1.- Looking for missing values
+sum(is.na(Weight$WeightKg))
+colSums(is.na(Weight))
+
+#2.- Clean Column Names
+janitor::clean_names(Weight)
+
+#3.- Convert Data Types
+str(Weight)
+glimpse(Weight)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Weight)
+unique((Weight))
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Weight$WeightKg)
+stats <- boxplot.stats(Weight$WeightKg)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Weight$WeightKg[Weight$WeightKg %in% stats$out]
+Weight$WeightKg[Weight$WeightKg %in% outliers] <- NA
+Weight_without_outliers <- Weight[!Weight$WeightKg %in% outliers, ]
+View(Weight_without_outliers)
+#save(Weight_without_outliers, file = "Weight_without_outliers.RData")
+
+
+#CLEAN "WeightPounds"
+
+#1.- Looking for missing values
+sum(is.na(Weight$WeightPounds))
+colSums(is.na(Weight))
+
+
+#5.- Fix Structural Errors
+#6.- Standarize values
+#7.- Handle Outliers
+boxplot.stats(Weight$WeightPounds)
+stats <- boxplot.stats(Weight$WeightPounds)
+
+#CREATED A NEW DATA FRAME WITHOUT THE OUTLIERS 
+
+outliers <- Weight$WeightPounds[Weight$WeightPounds %in% stats$out]
+Weight$WeightPounds[Weight$WeightPounds %in% outliers] <- NA
+Weight_without_outliers <- Weight[!Weight$WeightPounds %in% outliers, ]
+View(Weight_without_outliers)
+#save(Weight_without_outliers, file = "Weight_without_outliers.RData")
+
+#clean BMI
+#Change name BMI to BodyMassIndex
+
+Weight <- Weight %>% rename(BodyMassIndex = bmi)
+View(Weight)
+
+sum(is.na(Weight$BodyMassIndex))
+colSums(is.na(Weight))
+
+boxplot.stats(Weight$BodyMassIndex)
+stats <- boxplot.stats(Weight$BodyMassIndex)
+
+outliers <- Weight$BodyMassIndex[Weight$BodyMassIndex %in% stats$out]
+Weight$BodyMassIndex[Weight$BodyMassIndex %in% outliers] <- NA
+Weight_without_outliers <- Weight[!Weight$BodyMassIndex %in% outliers, ]
+View(Weight_without_outliers)
+#save(Weight_without_outliers, file = "Weight_without_outliers.RData")
+
+
+#VERIFY DATA IN NEW DF
+
+#2.- Clean Column Names
+janitor::clean_names(Weight_without_outliers)
+
+#3.- Convert Data Types
+str(Weight_without_outliers)
+glimpse(Weight_without_outliers)
+
+#4.- Handle Duplicates
+
+dplyr::distinct(Weight_without_outliers)
+unique((Weight_without_outliers))
+View(Weight_without_outliers)
+dim(Weight_without_outliers)
+
+Clean_Weight <- Weight_without_outliers %>% drop_na()
+View(Clean_Weight)
+str(Clean_Weight)
+dim(Clean_Weight)
+
+save(Clean_Weight, file = "Clean_Weight.RData")
+```
+
+## Summarizing the dataset
+
+```{r}
+
+#MY SUMMARY
+
+#Activity
+Clean_Activity %>%  
+  select(TotalDistance, LightlyActiveMinutes,
+         SedentaryMinutes, Calories) %>%
+  summary()
+  
+#Calories
+Clean_Calories %>%
+  select(Calories) %>%
+  summary()
+
+
+#Heartrate
+Clean_Heartrate %>%
+  select(BPM) %>%
+  summary()
+
+#Intensities
+Clean_Intensities %>%
+  select(SedentaryMinutes, LightlyActiveMinutes, FairlyActiveMinutes, VeryActiveMinutes, LightActiveDistance, ModeratelyActiveDistance, VeryActiveDistance) %>%
+  summary()
+
+#Steps
+Clean_Steps %>%
+  select(TotalSteps) %>%
+  summary()
+
+#Weight
+Clean_Weight %>%
+  select(WeightKg, WeightPounds, BodyMassIndex) %>%
+  summary()
+```
+
+##Data Merging for Analysis
+
+After thoroughly exploring, structuring, cleaning and manipulating the
+data, we proceed to merging some sets so that we can have a better view
+of the insights that the data is telling us.
+
+**Activity + Intensities = Active_Intensities** **Weight + Calories =
+Weight_Calories** **Steps + Heartrate = Steps_vs_Heartrate**
+
+```{R}
+
+#Active_Intensities
+
+#Loading and Exploring Datasets
+load("Clean_Activity.RData")
+load("Clean_Intensities.RData")
+
+View(Clean_Activity)
+View(Clean_Intensities)
+
+dim(Clean_Activity)
+dim(Clean_Intensities)
+
+dplyr::distinct(Clean_Activity)
+unique(Clean_Activity)
+
+dplyr::distinct(Clean_Intensities)
+unique(Clean_Intensities)
+
+colSums(is.na(Clean_Activity))
+colSums(is.na(Clean_Intensities))
+
+str(Clean_Activity)
+str(Clean_Intensities)
+
+#Manipulating duplicates
+
+sorted_df <- Clean_Activity[order(Clean_Activity$Id), ]
+
+duplicates <- duplicated(Clean_Activity[, c("Id", "TotalSteps")])
+unique_Activity <- Clean_Activity[!duplicates, ]
+
+dim(unique_Activity)
+View(unique_Activity)
+
+sorted_df <- Clean_Intensities[order(Clean_Intensities$Id), ]
+
+duplicates <- duplicated(Clean_Intensities[, c("Id", "ActivityDay")])
+unique_Intensities <- Clean_Intensities[!duplicates, ]
+
+dim(Clean_Intensities)
+View(Clean_Intensities)
+
+#Merge
+
+Intense_Activity <- merge(x = unique_Activity, y = unique_Intensities, by = "Id")
+
+dim(Intense_Activity)
+View(Intense_Activity)
+
+df_Intense_Activity_unique_clean <- distinct(Intense_Activity, Id, ActivityDay, .keep_all = TRUE)
+View(df_Intense_Activity_unique_clean)
+dim(df_Intense_Activity_unique_clean)
+
+#Explore and Clean Merged
+
+colSums(is.na(df_Intense_Activity_unique_clean))
+
+dplyr::distinct(df_Intense_Activity_unique_clean)
+unique(df_Intense_Activity_unique_clean)
+
+Intense_Activity_Clean <- df_Intense_Activity_unique_clean[!duplicates, ]
+
+dim(Intense_Activity_Clean)
+View(Intense_Activity_Clean)
+
+#looking for outliers
+boxplot.stats(Intense_Activity_Clean$TotalSteps)
+boxplot.stats(Intense_Activity_Clean$VeryActiveDistance.x)
+stats <- boxplot.stats(Intense_Activity_Clean$VeryActiveDistance.x)
+boxplot.stats(Intense_Activity_Clean$VeryActiveMinutes.x)
+
+#removing outliers
+outliers <- Intense_Activity_Clean$VeryActiveDistance.x[Intense_Activity_Clean$VeryActiveDistance.x %in% stats$out]
+Intense_Activity_Clean$VeryActiveDistance.x[Intense_Activity_Clean$VeryActiveDistance.x %in% outliers] <- NA
+VeryActiveDistance_without_outliers <- Intense_Activity_Clean[!Intense_Activity_Clean$VeryActiveDistance.x %in% outliers, ]
+View(VeryActiveDistance_without_outliers)
+
+boxplot.stats(VeryActiveDistance_without_outliers$VeryActiveDistance.x)
+
+
+
+
+#Weight_Calories
+
+#merged_df <- merge(x = dataframe1, y = dataframe2, by = "common_column")
+load("Clean_Weight.RData")
+load("Clean_Calories.RData")
+
+install.packages("ggthemes")
+library(ggthemes)
+ls(getNamespace("ggthemes"), all.names=TRUE)
+
+
+Weight_vs_Calories <- merge(x = Clean_Weight, y = Clean_Calories, by = "Id")
+
+View(Weight_vs_Calories)
+
+dim(Weight_vs_Calories)
+str(Weight_vs_Calories)
+glimpse(Weight_vs_Calories)
+
+sum(is.na(Weight_vs_Calories$weight_pounds))
+colSums(is.na(Weight_vs_Calories))
+
+boxplot.stats(Weight_vs_Calories$weight_pounds)
+boxplot.stats(Weight_vs_Calories$BodyMassIndex)
+boxplot.stats(Weight_vs_Calories$Calories)
+
+
+
+#Steps_vs_Heartrate
+
+load("Clean_Steps.RData")
+load("Clean_Heartrate.RData")
+dim(Clean_Steps)
+dim(Clean_Heartrate)
+
+dplyr::distinct(Clean_Heartrate)
+unique(Clean_Heartrate)
+tail(Clean_Heartrate)
+
+sorted_df <- Clean_Heartrate[order(Clean_Heartrate$Id), ]
+
+duplicates <- duplicated(Clean_Heartrate[, c("Id", "BPM")])
+df_unique <- Clean_Heartrate[!duplicates, ]
+dim(df_unique)
+dim(Clean_Steps)
+
+
+View(Steps_vs_Heartrate)
+
+
+sum(is.na(Steps_vs_Heartrate$TotalSteps))
+sum(is.na(Steps_vs_Heartrate$BPM))
+colSums(is.na(Steps_vs_Heartrate))
+
+dplyr::distinct(Steps_vs_Heartrate)
+unique((Steps_vs_Heartrate))
+
+
+#Merge
+
+Steps_vs_Heartrate <- merge(x = Clean_Steps, y = df_unique, by = "Id")
+
+
+str(Steps_vs_Heartrate)
+
+
+df_unique_clean <- distinct(Steps_vs_Heartrate, Id, ActivityDay, .keep_all = TRUE)
+View(df_unique_clean)                      
+dim(df_unique_clean)
+
+
+
+boxplot.stats(df_unique_clean$TotalSteps)
+boxplot.stats(df_unique_clean$BPM)
+
+
+```
+
+##Data Visualization
+
+```{R}
+
+#Active_Intensities
+
+#**Visualization** 
+ggplot(Intense_Activity_Clean, aes(x =VeryActiveDistance.y, y = VeryActiveMinutes.y, size = TotalSteps, color= "Steps")) + 
+  geom_point() + 
+  geom_smooth(method = "loess", aes(color ="Smooth Line")) + 
+  labs(title = "Distance and Active Time vs Steps", x = "Active Distance (miles)", y = "Active Times (minutes)", color =
+         "Steps")
+
+ggplot(Intense_Activity_Clean, aes(x = TotalSteps, y = Calories, color =
+TotalDistance)) + geom_point() + labs(title ="Calories & Distance", x =
+"Total Steps", y = "Calories", color = "Total Distance")
+
+#Wight_Calories
+
+#**Visualization** library(ggplot2) #Multi-Line Chart
+ggplot(Weight_vs_Calories, aes(x = Calories, y = weight_pounds, color =
+BodyMassIndex)) + geom_line() + labs(title = "Calories, Weight, and Body
+Mass", x = "Calories", y = "Weight in Pounds", color = "Body Mass
+Index") + theme_minimal()
+
+#stacked library(ggplot2)
+
+ggplot(Weight_vs_Calories, aes(x = weight_pounds, y = BodyMassIndex,
+fill = Calories)) + geom_area() + labs(title = "Calories effect on
+Weight and Mass", x = "Weight in Pounds", y = "Body Mass Index", fill =
+"Calories") + theme_calc()
+
+#bubble library(ggplot2) ggplot(Weight_vs_Calories, aes(x =
+BodyMassIndex, y = weight_pounds, size = Calories, color =
+BodyMassIndex)) + geom_point(alpha = 0.6) + scale_size(range = c(1,
+10)) + scale_color_viridis_c() + labs(title = "BMI, Calories and
+Weight", x = "Body Mass Index", y = "Weight in Pounds", size =
+"Calories", color = "BMI") + theme_minimal()
+
+#Steps_vs_Heartrate
+
+#**Visualizations** #Smooth Line scatter plot ggplot(df_unique_clean,
+aes(x = BPM, y = TotalSteps)) + geom_point() + geom_smooth(method =
+"loess")
+
+#Line Plot ggplot(df_unique_clean, aes(x = TotalSteps, y = BPM, color =
+BPM)) + geom_line() + scale_color_gradient(low = "red", high = "gold",
+name = "BPM") + labs(title = "Steps vs Heartrate",x = "Total Steps", y =
+"BPM", color = "BPM")
+```
